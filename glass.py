@@ -98,42 +98,38 @@ startangle = startangle + math.radians(60)
 endangle   = endangle   + math.radians(60)
 sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center6, axis, corner_radius), startangle, endangle),False)
 
-
 doc.recompute()
 
 
+e = sketch.Shape.Edges[6]
+#startpoint6 = e.Vertexes[0].Point
+endpoint1   = e.Vertexes[1].Point
+e = sketch.Shape.Edges[7]
+startpoint1 = e.Vertexes[0].Point
+endpoint2   = e.Vertexes[1].Point
+e = sketch.Shape.Edges[8]
+startpoint2 = e.Vertexes[0].Point
+endpoint3   = e.Vertexes[1].Point
+e = sketch.Shape.Edges[9]
+startpoint3 = e.Vertexes[0].Point
+endpoint4   = e.Vertexes[1].Point
+e = sketch.Shape.Edges[10]
+startpoint4 = e.Vertexes[0].Point
+endpoint5   = e.Vertexes[1].Point
+e = sketch.Shape.Edges[11]
+startpoint5 = e.Vertexes[0].Point
+endpoint6   = e.Vertexes[1].Point
+e = sketch.Shape.Edges[6]
+startpoint6 = e.Vertexes[0].Point
+#endpoint1   = e.Vertexes[1].Point
 
-'''
-# construction: the outer limit of the hexagon
-outer = RegularPolygon.makeRegularPolygon(sketch,hexa,Vector(0,0,0),Vector(outer_radius,0,0),True)
 
-
-doc.recompute()
-
-# create small circles at the six vertexes of the rounder
-for i, v in enumerate(doc.getObject(SketchLabel).Shape.Edges):
-    #print("i:", i+1, " v:", v)
-    X = v.Vertexes[0].X
-    Y = v.Vertexes[0].Y
-    Z = v.Vertexes[0].Z
-    #print("Edge" + str(i+1) +" x = " + str(round(X,2)) + " y = " + str(round(Y,2)) + " z = " + str(round(Z,2)))
-    centerpoint = Vector(X,Y,0)
-    radius = corner_radius
-    direction = Vector(0,0,1)
-    sketch.addGeometry(Part.Circle(centerpoint, direction, radius),False)
-
-
-  #print("Edgename: Edge" + str(i+1) + " XYZ: " + str(e.Vertexes[0].Point) + str(e.Vertexes[1].Point) )
-  if -0.1 < e.Vertexes[0].X - (side_length/2 - hinge_length/2 -1) < 0.1:
-    if -0.1 < e.Vertexes[1].X - (side_length/2 - hinge_length/2 -1) < 0.1:
-      if -0.1 < e.Vertexes[0].Z - (common_height + ridge_height) < 0.1:
-        if -0.1 < e.Vertexes[1].Z - (common_height + ridge_height) < 0.1:
-          chamferlist = []
-          chamferlist.append((i+1,2.99,2))
-          chamfer_ridg1 = doc.addObject("Part::Chamfer","Chamfer_ridg1")
-          chamfer_ridg1.Base = side_hinge_ridg1
-          chamfer_ridg1.Edges = chamferlist
-'''
+line1 = sketch.addGeometry(Part.LineSegment(startpoint1, endpoint1),False)
+line2 = sketch.addGeometry(Part.LineSegment(startpoint2, endpoint2),False)
+line3 = sketch.addGeometry(Part.LineSegment(startpoint3, endpoint3),False)
+line4 = sketch.addGeometry(Part.LineSegment(startpoint4, endpoint4),False)
+line5 = sketch.addGeometry(Part.LineSegment(startpoint5, endpoint5),False)
+line6 = sketch.addGeometry(Part.LineSegment(startpoint6, endpoint6),False)
 
 
 
