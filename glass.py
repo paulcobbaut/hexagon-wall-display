@@ -12,11 +12,12 @@ import PartDesign
 import Sketcher
 from ProfileLib import RegularPolygon 
 import math
+import importSVG
 
 # Dimensions in mm
 hexa = 6
-outer_radius   = 170
-corner_radius  =  10
+outer_radius   = 166
+corner_radius  =  20
 rounder_radius = outer_radius - corner_radius
 
 # labels
@@ -24,25 +25,6 @@ DocLabel    = 'Hexagon Glass Panel'
 BodyLabel   = 'Glass_Body'
 SketchLabel = 'Glass_Sketch'
 OuterLabel  = 'Outer_Hexagon'
-
-# functions
-
-def create_arc_from_points(Center, StartPoint, EndPoint):
-  #Center = App.Vector(0,0,0)
-  #StartPoint = App.Vector(0, 1, 0)
-  #EndPoint = App.Vector(0.707, 0.707, 0)   #almost on the arc
-  Normal = (StartPoint - Center).cross(EndPoint - Center)
-  circ = Part.Circle(Center, Normal, (StartPoint - Center).Length)
-  up1 =  circ.parameter(StartPoint) #closest point - 'exact'
-  up2 = circ.parameter(EndPoint) # closest point 'approximate'
-  arc = Part.Arc(circ, up1, up2)
-  #print(f'arc start at {arc.StartPoint} ends at {arc.EndPoint}\n center {arc.centerOfCurvature(up1)}')
-  Part.show(arc.toShape())
-  print("In: ", StartPoint, " ", EndPoint)
-  print("Ui: ", up1, " ", up2)
-  return arc
-
-
 
 # start
 doc    = FreeCAD.newDocument(DocLabel)
@@ -67,20 +49,12 @@ center4 = sketch.Shape.Vertex4.Point
 center5 = sketch.Shape.Vertex5.Point
 center6 = sketch.Shape.Vertex6.Point
 
-#print('center1 =' , center1.X, ' ', center1.Y, ' ', center1.Z)
-#print('center2 =' , center2.X, ' ', center2.Y, ' ', center2.Z)
-#print('center3 =' , center3.X, ' ', center3.Y, ' ', center3.Z)
-#print('center4 =' , center4.X, ' ', center4.Y, ' ', center4.Z)
-#print('center5 =' , center5.X, ' ', center5.Y, ' ', center5.Z)
-#print('center6 =' , center6.X, ' ', center6.Y, ' ', center6.Z)
-
 # axis
 axis = Vector(0,0,1)
 
-
 # little circles
-startangle = math.radians(-45)
-endangle   = math.radians(45)
+startangle = math.radians(-30)
+endangle   = math.radians(30)
 sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center1, axis, corner_radius), startangle, endangle),False)
 startangle = startangle + math.radians(60)
 endangle   = endangle   + math.radians(60)
@@ -131,6 +105,21 @@ line4 = sketch.addGeometry(Part.LineSegment(startpoint4, endpoint4),False)
 line5 = sketch.addGeometry(Part.LineSegment(startpoint5, endpoint5),False)
 line6 = sketch.addGeometry(Part.LineSegment(startpoint6, endpoint6),False)
 
+#doc.removeObject('rounder')
+sketch.delGeometries([0])
+sketch.delGeometries([0])
+sketch.delGeometries([0])
+sketch.delGeometries([0])
+sketch.delGeometries([0])
+sketch.delGeometries([0])
+sketch.delGeometries([0])
+
+
+doc.recompute()
+
+objs = []
+objs.append(doc.getObject("Glass_Sketch"))
+importSVG.export(objs, u"/home/paul/FreeCAD models/smurf/Hexagon Glass sketch.svg")
 
 
 
