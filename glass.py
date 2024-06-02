@@ -61,13 +61,13 @@ startangle = math.radians(-30)
 endangle   = math.radians(30)
 sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center1, axis, corner_radius), startangle, endangle),False)
 startangle = startangle + math.radians(60)
-endangle   = endangle   + math.radians(60)
+endangle   = endangle   + math.radians(60) - math.radians(30)  # top cut, top side is lower to use lid
 sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center2, axis, corner_radius), startangle, endangle),False)
-startangle = startangle + math.radians(60)
-endangle   = endangle   + math.radians(60)
+startangle = startangle + math.radians(60) + math.radians(30)  # top cut, top side is lower to use lid
+endangle   = endangle   + math.radians(60) + math.radians(30)  # top cut, top side is lower to use lid
 sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center3, axis, corner_radius), startangle, endangle),False)
-startangle = startangle + math.radians(60)
-endangle   = endangle   + math.radians(60)
+startangle = startangle + math.radians(60) - math.radians(30)  # top cut, top side is lower to use lid
+endangle   = endangle   + math.radians(60) 
 sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center4, axis, corner_radius), startangle, endangle),False)
 startangle = startangle + math.radians(60)
 endangle   = endangle   + math.radians(60)
@@ -120,23 +120,6 @@ sketch.delGeometries([0])
 
 doc.recompute()
 
-#### line to cut off from the top, so the lid can open and close
-# first find highest point (y value)
-
-highest_y = 0
-for i, e in enumerate(sketch.Shape.Edges): # Going through all edges of the other ridge
-  #print("Edgename: Edge" + str(i+1) + " XYZ: " + str(e.Vertexes[0].Point) + str(e.Vertexes[1].Point) )
-  if e.Vertexes[0].Y > highest_y:
-      highest_y = e.Vertexes[0].Y
-      #print(highest_y)
-
-# draw line just below highest point
-topcutstart = Vector(- outer_radius * 1.5, highest_y - topcut, 0)
-topcutend   = Vector(+ outer_radius * 1.5, highest_y - topcut, 0)
-topcutline  = sketch.addGeometry(Part.LineSegment(topcutstart, topcutend),False)
-
-
-doc.recompute()
 
 objs = []
 objs.append(doc.getObject("Glass_Sketch"))
