@@ -1,6 +1,7 @@
 """
 glass.py -- Paul Cobbaut, 2024-05-18
 2024-05-27
+2024-06-02
 Create a hexagon wall display for small figurines.
 3D-printed hexagon, covered by a bought plexiglass panel.
 This file ==> svg and dxf for plexiglass panel
@@ -19,6 +20,9 @@ hexa = 6
 outer_radius   = 166
 corner_radius  =  20
 rounder_radius = outer_radius - corner_radius
+topcut         =   2
+hingecut       =  10
+hingewidth     =  64
 
 # labels
 DocLabel    = 'Hexagon Glass Panel'
@@ -113,6 +117,23 @@ sketch.delGeometries([0])
 sketch.delGeometries([0])
 sketch.delGeometries([0])
 sketch.delGeometries([0])
+
+doc.recompute()
+
+#### line to cut off from the top, so the lid can open and close
+# first find highest point (y value)
+
+highest_y = 0
+for i, e in enumerate(sketch.Shape.Edges): # Going through all edges of the other ridge
+  #print("Edgename: Edge" + str(i+1) + " XYZ: " + str(e.Vertexes[0].Point) + str(e.Vertexes[1].Point) )
+  if e.Vertexes[0].Y > highest_y:
+      highest_y = e.Vertexes[0].Y
+      #print(highest_y)
+
+# draw line just below highest point
+topcutstart = Vector(- outer_radius * 1.5, highest_y - topcut, 0)
+topcutend   = Vector(+ outer_radius * 1.5, highest_y - topcut, 0)
+topcutline  = sketch.addGeometry(Part.LineSegment(topcutstart, topcutend),False)
 
 
 doc.recompute()
