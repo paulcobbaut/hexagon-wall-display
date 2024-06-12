@@ -2,6 +2,7 @@
 glass.py -- Paul Cobbaut, 2024-05-18
 2024-05-27
 2024-06-02
+2024-06-12
 Create a hexagon wall display for small figurines.
 3D-printed hexagon, covered by a bought plexiglass panel.
 This file ==> svg and dxf for plexiglass panel
@@ -20,7 +21,6 @@ hexa = 6
 outer_radius   = 166
 corner_radius  =  20
 rounder_radius = outer_radius - corner_radius
-topcut         =   2
 hingecut       =  10
 hingewidth     =  64
 
@@ -43,9 +43,7 @@ sketch.Placement = FreeCAD.Placement(Vector(0,0,0),FreeCAD.Rotation(Vector(1,0,0
 # calculate the six centers of the arcs that serve as corners
 center = Vector(0,0,0)
 rounder = RegularPolygon.makeRegularPolygon(sketch, hexa, center, Vector(rounder_radius,0,0),False)
-
 doc.recompute()
-
 center1 = sketch.Shape.Vertex1.Point
 center2 = sketch.Shape.Vertex2.Point
 center3 = sketch.Shape.Vertex3.Point
@@ -56,7 +54,7 @@ center6 = sketch.Shape.Vertex6.Point
 # axis
 axis = Vector(0,0,1)
 
-# little circles
+# draw the six arcs of the little circles, the top two only half
 startangle = math.radians(-30)
 endangle   = math.radians(30)
 sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center1, axis, corner_radius), startangle, endangle),False)
@@ -78,7 +76,15 @@ sketch.addGeometry(Part.ArcOfCircle(Part.Circle(center6, axis, corner_radius), s
 
 doc.recompute()
 
+# calculate the points for the top gap for the hinge
+# edge8 is the top edge; hopefully :)
+x = hingewidth/2  # half length of hinge cutout on either side of Y-axis
+rightpoint     = Vector(x , sketch.Shape.Edges[8].Vertexes[0].Y   , 0)
+rightpointdown = Vector(x , sketch.Shape.Edges[8].Vertexes[0].Y -5, 0)
+leftpointdown  = Vector(-x, sketch.Shape.Edges[8].Vertexes[0].Y -5, 0)
+leftpoint      = Vector(-x, sketch.Shape.Edges[8].Vertexes[0].Y   , 0)
 
+# calculate start and endpoints of straight lines between arcs
 e = sketch.Shape.Edges[6]
 #startpoint6 = e.Vertexes[0].Point
 endpoint1   = e.Vertexes[1].Point
@@ -102,12 +108,18 @@ startpoint6 = e.Vertexes[0].Point
 #endpoint1   = e.Vertexes[1].Point
 
 
+# draw the line pieces between the end points of the arcs
 line1 = sketch.addGeometry(Part.LineSegment(startpoint1, endpoint1),False)
-line2 = sketch.addGeometry(Part.LineSegment(startpoint2, endpoint2),False)
+line2a = sketch.addGeometry(Part.LineSegment(startpoint2, leftpoint),False)
+lineh1 = sketch.addGeometry(Part.LineSegment(rightpoint    , rightpointdown), False)
+lineh2 = sketch.addGeometry(Part.LineSegment(rightpointdown, leftpointdown ), False)
+lineh3 = sketch.addGeometry(Part.LineSegment(leftpointdown , leftpoint     ), False)
+line2b = sketch.addGeometry(Part.LineSegment(rightpoint, endpoint2),False)
 line3 = sketch.addGeometry(Part.LineSegment(startpoint3, endpoint3),False)
 line4 = sketch.addGeometry(Part.LineSegment(startpoint4, endpoint4),False)
 line5 = sketch.addGeometry(Part.LineSegment(startpoint5, endpoint5),False)
 line6 = sketch.addGeometry(Part.LineSegment(startpoint6, endpoint6),False)
+
 
 #doc.removeObject('rounder')
 sketch.delGeometries([0])
