@@ -1,5 +1,7 @@
 """
-zeshoek.py -- Paul Cobbaut, 2024-05-07
+zeshoek.py -- Paul Cobbaut
+2024-05-07
+2024-06-17
 Create a hexagon wall display for small figurines.
 3D-printed hexagon, covered by a bought panel.
 Corners for the hexagon and for the shelves.
@@ -24,12 +26,12 @@ export_directory = "/home/paul/FreeCAD_generated/hexagon/"
 
 #Dimensions in mm
 center_radius   =  5
-arm_length      = 40
+arm_length      = 20
 arm_width       =  6
 hole_width      =  2
 cover_width     = arm_width/2 - hole_width/2
 depth           = 21
-gluepart_depth  =  2
+gluepart_depth  =  1.90
 gluepart_radius = 12
 glass_mm        =  3
 
@@ -53,9 +55,7 @@ def polar_to_vector(radius, angle_degrees):
     y = round(radius * math.sin(angle_radians),2)
     return Vector(x, y, 0)
 
-
-def circle_line_segment_intersection(circle_center, circle_radius, line_start, line_end):
-    cx, cy = circle_center
+def circle_line_segment_intersection(circle_radius, line_start, line_end):
     x1, y1 = line_start
     x2, y2 = line_end
 
@@ -63,20 +63,16 @@ def circle_line_segment_intersection(circle_center, circle_radius, line_start, l
     dy = y2 - y1
     dr = math.sqrt(dx**2 + dy**2)
     D = x1*y2 - x2*y1
-
     discriminant = circle_radius**2 * dr**2 - D**2
-
-    # Two intersection points
     sqrt_discriminant = math.sqrt(discriminant)
-    x1 = (D * dy + math.copysign(dx * sqrt_discriminant, dy)) / (dr**2)
-    y1 = (-D * dx + math.fabs(dy) * sqrt_discriminant) / (dr**2)
-    x2 = (D * dy - math.copysign(dx * sqrt_discriminant, dy)) / (dr**2)
-    y2 = (-D * dx - math.fabs(dy) * sqrt_discriminant) / (dr**2)
+    x1 = ( D * dy + math.copysign(dx * sqrt_discriminant, dy)) / (dr**2)
+    x2 = ( D * dy - math.copysign(dx * sqrt_discriminant, dy)) / (dr**2)
+    y1 = (-D * dx + math.copysign(dy * sqrt_discriminant, dx)) / (dr**2)
+    y2 = (-D * dx - math.copysign(dy * sqrt_discriminant, dx)) / (dr**2)
 
-    intersection_points = [(round(x1 + cx,1), round(y1 + cy,1)), (round(x2 + cx,1), round(y2 + cy,1))]
+    intersection_points = [(round(x1,2), round(y1,2)), (round(x2,2), round(y2,2))]
     valid_intersection_points = [point for point in intersection_points if is_point_on_line_segment(point, line_start, line_end)]
     return valid_intersection_points
-
 
 def is_point_on_line_segment(point, line_start, line_end):
     x, y = point
@@ -131,39 +127,39 @@ circle_center = (0, 0)
 
 line_start   = (a_end_for.x, a_end_for.y)
 line_end     = (a_end_half.x, a_end_half.y)
-intersection = circle_line_segment_intersection(circle_center, center_radius, line_start, line_end)
+intersection = circle_line_segment_intersection(center_radius, line_start, line_end)
 a_int_for    = Vector(intersection[0][0], intersection[0][1], 0)
 a_for_inter  = Sketch_obj.addGeometry(Part.LineSegment(a_end_for, a_int_for),False)
 
 line_start   = (a_end_bac.x, a_end_bac.y)
 line_end     = (- a_end_half.x, - a_end_half.y)
-intersection = circle_line_segment_intersection(circle_center, center_radius, line_start, line_end)
+intersection = circle_line_segment_intersection(center_radius, line_start, line_end)
 a_int_bac    = Vector(intersection[0][0], intersection[0][1],0)
 a_bac_inter  = Sketch_obj.addGeometry(Part.LineSegment(a_end_bac, a_int_bac),False)
 
 
 line_end     = (b_end_for.x, b_end_for.y)
 line_start   = (b_end_half.x, b_end_half.y)
-intersection = circle_line_segment_intersection(circle_center, center_radius, line_start, line_end)
+intersection = circle_line_segment_intersection(center_radius, line_start, line_end)
 b_int_for    = Vector(intersection[0][0], intersection[0][1],0)
 b_for_inter  = Sketch_obj.addGeometry(Part.LineSegment(b_end_for, b_int_for),False)
 
 line_end     = (b_end_bac.x, b_end_bac.y)
 line_start   = (- b_end_half.x, - b_end_half.y)
-intersection = circle_line_segment_intersection(circle_center, center_radius, line_start, line_end)
+intersection = circle_line_segment_intersection(center_radius, line_start, line_end)
 b_int_bac    = Vector(intersection[0][0], intersection[0][1],0)
 b_bac_inter  = Sketch_obj.addGeometry(Part.LineSegment(b_end_bac, b_int_bac),False)
 
 
 line_start   = (c_end_for.x, c_end_for.y)
 line_end     = (c_end_half.x, c_end_half.y)
-intersection = circle_line_segment_intersection(circle_center, center_radius, line_start, line_end)
+intersection = circle_line_segment_intersection(center_radius, line_start, line_end)
 c_int_for    = Vector(intersection[0][0], intersection[0][1],0)
 c_for_inter  = Sketch_obj.addGeometry(Part.LineSegment(c_end_for, c_int_for),False)
 
 line_start   = (c_end_bac.x, c_end_bac.y)
 line_end     = (- c_end_half.x, - c_end_half.y)
-intersection = circle_line_segment_intersection(circle_center, center_radius, line_start, line_end)
+intersection = circle_line_segment_intersection(center_radius, line_start, line_end)
 c_int_bac    = Vector(intersection[0][0], intersection[0][1],0)
 c_bac_inter  = Sketch_obj.addGeometry(Part.LineSegment(c_end_bac, c_int_bac),False)
 
@@ -285,7 +281,7 @@ Mesh_Glass.Label = Mesh_Glass_Label
 # 3mf
 export_list = []
 export_list.append(Mesh_Glass)
-Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/Glass_corner.3mf")
+Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/Top_three_way.3mf")
 
 doc.recompute()
 FreeCADGui.ActiveDocument.ActiveView.fitAll()
