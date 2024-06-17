@@ -27,7 +27,7 @@ arm_width       =  6
 hole_width      =  2
 cover_width     = arm_width/2 - hole_width/2
 depth           = 21
-gluepart_depth  =  2
+gluepart_depth  =  1.90
 gluepart_radius = 12
 arm_d_length    = 42
 
@@ -243,6 +243,8 @@ c_end_hole_for = c_end_for - polar_to_vector(cover_width, c_deg + 90) + polar_to
 a_end_hole_bac = a_end_bac + polar_to_vector(cover_width, a_deg + 90) + polar_to_vector(0.1, a_deg)
 b_end_hole_bac = b_end_bac + polar_to_vector(cover_width, b_deg + 90) + polar_to_vector(0.1, b_deg)
 c_end_hole_bac = c_end_bac + polar_to_vector(cover_width, c_deg + 90) + polar_to_vector(0.1, c_deg)
+d_end_hole_for = dm + d_end_half
+d_end_hole_bac = dm
 
 # hole points of the inner lines
 a_inner_hole_for =   polar_to_vector(hole_width/2, a_deg + 90) + polar_to_vector(center_radius, a_deg )
@@ -251,6 +253,8 @@ c_inner_hole_for =   polar_to_vector(hole_width/2, c_deg + 90) + polar_to_vector
 a_inner_hole_bac = - polar_to_vector(hole_width/2, a_deg + 90) + polar_to_vector(center_radius, a_deg )
 b_inner_hole_bac = - polar_to_vector(hole_width/2, b_deg + 90) + polar_to_vector(center_radius, b_deg )
 c_inner_hole_bac = - polar_to_vector(hole_width/2, c_deg + 90) + polar_to_vector(center_radius, c_deg )
+d_inner_hole_for =   dm + d_end_half - polar_to_vector(10, d_deg )
+d_inner_hole_bac =   dm - polar_to_vector(10, d_deg )
 
 # lines
 a_end_hole   = Sketch_topface.addGeometry(Part.LineSegment(a_end_hole_for, a_end_hole_bac),False)
@@ -266,15 +270,16 @@ a_bac_hole   = Sketch_topface.addGeometry(Part.LineSegment(a_end_hole_bac, a_inn
 b_bac_hole   = Sketch_topface.addGeometry(Part.LineSegment(b_end_hole_bac, b_inner_hole_bac),False)
 c_bac_hole   = Sketch_topface.addGeometry(Part.LineSegment(c_end_hole_bac, c_inner_hole_bac),False)
 
-
-'''
-
+d_end_hole   = Sketch_topface.addGeometry(Part.LineSegment(d_end_hole_for, d_end_hole_bac),False)
+d_inner_hole = Sketch_topface.addGeometry(Part.LineSegment(d_inner_hole_for, d_inner_hole_bac),False)
+d_for_hole   = Sketch_topface.addGeometry(Part.LineSegment(d_end_hole_for, d_inner_hole_for),False)
+d_bac_hole   = Sketch_topface.addGeometry(Part.LineSegment(d_end_hole_bac, d_inner_hole_bac),False)
 
 # the hole
 PocketLabel = 'Pocket_hole'
 Pocket_hole = doc.getObject(BodyLabel).newObject('PartDesign::Pocket','Pocket')
 Pocket_hole.Profile = Sketch_topface
-Pocket_hole.Length = depth - 2
+Pocket_hole.Length = depth - gluepart_depth
 
 # bottom circle to glue to wall
 # sketch
@@ -309,107 +314,8 @@ Mesh_Glue.Label = Mesh_Glue_Label
 # 3mf
 export_list = []
 export_list.append(Mesh_Glue)
+Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/Glue_mid_shelve.3mf")
 
-
-
-
-# connect the arms 
-a_to_b = Sketch_obj.addGeometry(Part.LineSegment(a_int_for, b_int_bac),False)
-b_to_c = Sketch_obj.addGeometry(Part.LineSegment(b_int_for, c_int_bac),False)
-c_to_a = Sketch_obj.addGeometry(Part.LineSegment(c_int_for, a_int_bac),False)
-
-# pad 
-PadLabel  = 'Pad_main'
-Pad_obj   = doc.getObject(BodyLabel).newObject('PartDesign::Pad',PadLabel)
-Pad_obj.Profile = doc.getObject(SketchLabel)
-Pad_obj.Length = depth
-
-doc.recompute()
-
-# find top face
-for i, fac in enumerate(Pad_obj.Shape.Faces): # Going through all faces of the object
-  if fac.Surface.Position.z == depth:
-      topface = 'Face{:d}'.format(i+1) # Building face name from its index
-
-# Create sketch on topface of pad
-SketchLabel = 'Sketch_topface'
-Sketch_topface  = doc.getObject(BodyLabel).newObject("Sketcher::SketchObject", SketchLabel)
-Sketch_topface.Support = doc.getObject(PadLabel),[topface,]
-Sketch_topface.MapMode = 'FlatFace'
-Sketch_topface.ViewObject.hide()
-
-# hole points of the end lines
-a_end_hole_for = a_end_for - polar_to_vector(cover_width, a_deg + 90) + polar_to_vector(0.1, a_deg)
-b_end_hole_for = b_end_for - polar_to_vector(cover_width, b_deg + 90) + polar_to_vector(0.1, b_deg)
-c_end_hole_for = c_end_for - polar_to_vector(cover_width, c_deg + 90) + polar_to_vector(0.1, c_deg)
-a_end_hole_bac = a_end_bac + polar_to_vector(cover_width, a_deg + 90) + polar_to_vector(0.1, a_deg)
-b_end_hole_bac = b_end_bac + polar_to_vector(cover_width, b_deg + 90) + polar_to_vector(0.1, b_deg)
-c_end_hole_bac = c_end_bac + polar_to_vector(cover_width, c_deg + 90) + polar_to_vector(0.1, c_deg)
-
-# hole points of the inner lines
-a_inner_hole_for =   polar_to_vector(hole_width/2, a_deg + 90) + polar_to_vector(center_radius, a_deg )
-b_inner_hole_for =   polar_to_vector(hole_width/2, b_deg + 90) + polar_to_vector(center_radius, b_deg )
-c_inner_hole_for =   polar_to_vector(hole_width/2, c_deg + 90) + polar_to_vector(center_radius, c_deg )
-a_inner_hole_bac = - polar_to_vector(hole_width/2, a_deg + 90) + polar_to_vector(center_radius, a_deg )
-b_inner_hole_bac = - polar_to_vector(hole_width/2, b_deg + 90) + polar_to_vector(center_radius, b_deg )
-c_inner_hole_bac = - polar_to_vector(hole_width/2, c_deg + 90) + polar_to_vector(center_radius, c_deg )
-
-# lines
-a_end_hole   = Sketch_topface.addGeometry(Part.LineSegment(a_end_hole_for, a_end_hole_bac),False)
-b_end_hole   = Sketch_topface.addGeometry(Part.LineSegment(b_end_hole_for, b_end_hole_bac),False)
-c_end_hole   = Sketch_topface.addGeometry(Part.LineSegment(c_end_hole_for, c_end_hole_bac),False)
-a_inner_hole = Sketch_topface.addGeometry(Part.LineSegment(a_inner_hole_for, a_inner_hole_bac),False)
-b_inner_hole = Sketch_topface.addGeometry(Part.LineSegment(b_inner_hole_for, b_inner_hole_bac),False)
-c_inner_hole = Sketch_topface.addGeometry(Part.LineSegment(c_inner_hole_for, c_inner_hole_bac),False)
-a_for_hole   = Sketch_topface.addGeometry(Part.LineSegment(a_end_hole_for, a_inner_hole_for),False)
-b_for_hole   = Sketch_topface.addGeometry(Part.LineSegment(b_end_hole_for, b_inner_hole_for),False)
-c_for_hole   = Sketch_topface.addGeometry(Part.LineSegment(c_end_hole_for, c_inner_hole_for),False)
-a_bac_hole   = Sketch_topface.addGeometry(Part.LineSegment(a_end_hole_bac, a_inner_hole_bac),False)
-b_bac_hole   = Sketch_topface.addGeometry(Part.LineSegment(b_end_hole_bac, b_inner_hole_bac),False)
-c_bac_hole   = Sketch_topface.addGeometry(Part.LineSegment(c_end_hole_bac, c_inner_hole_bac),False)
-
-# the hole
-PocketLabel = 'Pocket_hole'
-Pocket_hole = doc.getObject(BodyLabel).newObject('PartDesign::Pocket','Pocket')
-Pocket_hole.Profile = Sketch_topface
-Pocket_hole.Length = depth - 2
-
-# bottom circle to glue to wall
-# sketch
-SketchLabel = 'bottom_sketch'
-Sketch_bot  = doc.getObject(BodyLabel).newObject("Sketcher::SketchObject", SketchLabel)
-Sketch_bot.Placement = FreeCAD.Placement(Vector(0,0,0),FreeCAD.Rotation(Vector(1,0,0),0))
-Sketch_bot.ViewObject.hide()
-# circle
-centerpoint = Vector(0,0,0)
-radius = gluepart_radius
-direction = Vector(0,0,1)
-Circle_obj = Sketch_bot.addGeometry(Part.Circle(centerpoint, direction, radius),False)
-# pad 
-PadLabel  = 'Pad_bottom'
-Pad_bottom   = doc.getObject(BodyLabel).newObject('PartDesign::Pad',PadLabel)
-Pad_bottom.Profile = doc.getObject(SketchLabel)
-Pad_bottom.Length = gluepart_depth
-Pad_bottom.ViewObject.hide()
-# refine
-RefineGlueLabel = 'Refine_Glue'
-Refine_Glue = doc.addObject('Part::Refine',RefineGlueLabel)
-Refine_Glue.Source = Pad_bottom
-Refine_Glue.Label = RefineGlueLabel
-Refine_Glue.ViewObject.hide()
-doc.recompute()
-# mesh
-Mesh_Glue_Label = 'Mesh_Glue'
-Mesh_Glue = doc.addObject("Mesh::Feature","Mesh_Glue")
-Shape = Part.getShape(Refine_Glue,"")
-Mesh_Glue.Mesh = MeshPart.meshFromShape(Shape=Shape, LinearDeflection=1, AngularDeflection=0.1, Relative=False)
-Mesh_Glue.Label = Mesh_Glue_Label
-# 3mf
-export_list = []
-export_list.append(Mesh_Glue)
-Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/Glue_corner.3mf")
-
-'''
 
 doc.recompute()
 FreeCADGui.ActiveDocument.ActiveView.fitAll()

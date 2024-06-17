@@ -35,7 +35,7 @@ common_width  =  6
 
 # shelves
 short_length = 211 # short shelve (was 207 with previous)
-long_length  = 288 # long shelve
+long_length  = 256 # long shelve
 cross_length =  10 # where shelves rest on
 cross_cut    =   2 # no overlap at the back
 cross_height = common_height - cross_cut
@@ -110,120 +110,15 @@ side_compound        = doc.addObject("Part::Compound","side_compound")
 side_compound.Links  = [side_main, side_left, side_right,side_ridge]
 side_compound.ViewObject.hide()
 
-
-# 6. side --> normal side with half-extension for quartershelve
-sideq_main  = makebox('sideq_main' , side_length  , common_width, common_height)
-sideq_left  = makebox('sideq_left' , insert_length, insert_width, insert_height)
-sideq_right = makebox('sideq_right', insert_length, insert_width, insert_height)
-sideq_ridge = makebox('sideq_ridge', side_length  , ridge_width , ridge_height )
-sideq_left.Placement  = FreeCAD.Placement(Vector(-insert_length, insert_Y, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
-sideq_right.Placement = FreeCAD.Placement(Vector(side_length   , insert_Y, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
-sideq_ridge.Placement = FreeCAD.Placement(Vector(0             , ridge_Y , common_height), FreeCAD.Rotation(Vector(1,0,0), 0))
-# holders for shelve on the side, midway
-# Pythagoras helps a bit, 0.866 = cos30
-hypo   = common_width / cos30
-# main for the solid part
-holder1_main = makebox('holder1_main', common_width  , holder_length/2, common_height)
-holder2_main = makebox('holder2_main', common_width  , holder_length/2, common_height)
-holder1_main.Placement = FreeCAD.Placement(Vector(side_length/2 - hypo/2, common_width/2, 0),App.Rotation(App.Vector(0,0,1),30))
-holder2_main.Placement = FreeCAD.Placement(Vector(side_length/2 + hypo/2, common_width/2, 0),App.Rotation(App.Vector(0,0,1),210))
-# extr for the extrusion on which the shelve rests
-holder1_extr = makebox('holder1_extr', common_width/2, holder_length/2, common_height)
-holder2_extr = makebox('holder2_extr', common_width/2, holder_length/2, common_height)
-X1 = (side_length / 2) - (hypo / 2) - (insert_length * sin30)
-X2 = (side_length / 2) + (hypo / 2) + (insert_length * sin30) - ((common_width / 2) * cos30)
-Y1 = (common_width / 2) + (insert_length * cos30)
-Y2 = (common_width / 2) - (insert_length * cos30) - ((common_width / 2) * sin30)
-holder1_extr.Placement = FreeCAD.Placement(Vector(X1, Y1, 0),App.Rotation(App.Vector(0,0,1),30))
-holder2_extr.Placement = FreeCAD.Placement(Vector(X2, Y2, 0),App.Rotation(App.Vector(0,0,1),210))
-# edge for the back to push the shelve against
-holder1_edge = makebox('holder1_edge', common_width/2, holder_length/2, cross_cut)
-holder2_edge = makebox('holder2_edge', common_width/2, holder_length/2, cross_cut )
-X3 = (side_length / 2) - (hypo / 2) - (insert_length * sin30) + ((common_width / 2) * cos30)
-X4 = (side_length / 2) + (hypo / 2) + (insert_length * sin30)
-Y3 = (common_width / 2) + (insert_length * cos30) + ((common_width / 2) * sin30)
-Y4 = (common_width / 2) - (insert_length * cos30)   
-holder1_edge.Placement = FreeCAD.Placement(Vector(X3, Y3, 0),App.Rotation(App.Vector(0,0,1),30))
-holder2_edge.Placement = FreeCAD.Placement(Vector(X4, Y4, 0),App.Rotation(App.Vector(0,0,1),210))
-
-sideq_compound        = doc.addObject("Part::Compound","sideq_compound")
-sideq_compound.Links  = [sideq_main, sideq_left, sideq_right,sideq_ridge, holder1_main, holder1_extr, holder1_edge, holder2_main, holder2_extr, holder2_edge]
-#sideq_compound.ViewObject.hide()
-
-# refine
-Refine_sideq = doc.addObject('Part::Refine','Refine_sideq')
-Refine_sideq.Source = sideq_compound
-Refine_sideq.Label = 'Refine_sideq'
-Refine_sideq.ViewObject.hide()
-doc.recompute()
-# mesh
-Mesh_sideq = doc.addObject("Mesh::Feature","Mesh_sideq")
-Shape = Part.getShape(Refine_sideq,"")
-Mesh_sideq.Mesh = MeshPart.meshFromShape(Shape=Shape, LinearDeflection=1, AngularDeflection=0.1, Relative=False)
-Mesh_sideq.Label = "Mesh_sideq"
-# 3mf
-export_list = []
-export_list.append(Mesh_sideq)
-Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/sideq.3mf")
-
-
-
-sideq2_compound        = doc.addObject("Part::Compound","sideq2_compound")
-sideq2_compound.Links  = [sideq_main, sideq_left, sideq_right,sideq_ridge, holder1_main, holder1_extr, holder1_edge]
-#sideq_compound.ViewObject.hide()
-
-# refine
-Refine_sideq2 = doc.addObject('Part::Refine','Refine_sideq2')
-Refine_sideq2.Source = sideq2_compound
-Refine_sideq2.Label = 'Refine_sideq2'
-Refine_sideq2.ViewObject.hide()
-doc.recompute()
-# mesh
-Mesh_sideq2 = doc.addObject("Mesh::Feature","Mesh_sideq2")
-Shape = Part.getShape(Refine_sideq2,"")
-Mesh_sideq2.Mesh = MeshPart.meshFromShape(Shape=Shape, LinearDeflection=1, AngularDeflection=0.1, Relative=False)
-Mesh_sideq2.Label = "Mesh_sideq2"
-# 3mf
-export_list = []
-export_list.append(Mesh_sideq2)
-Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/sideq2.3mf")
-
-
-
-sideq3_compound        = doc.addObject("Part::Compound","sideq3_compound")
-sideq3_compound.Links  = [sideq_main, sideq_left, sideq_right,sideq_ridge, holder2_main, holder2_extr, holder2_edge]
-#sideq_compound.ViewObject.hide()
-
-# refine
-Refine_sideq3 = doc.addObject('Part::Refine','Refine_sideq3')
-Refine_sideq3.Source = sideq3_compound
-Refine_sideq3.Label = 'Refine_sideq3'
-Refine_sideq3.ViewObject.hide()
-doc.recompute()
-# mesh
-Mesh_sideq3 = doc.addObject("Mesh::Feature","Mesh_sideq3")
-Shape = Part.getShape(Refine_sideq3,"")
-Mesh_sideq3.Mesh = MeshPart.meshFromShape(Shape=Shape, LinearDeflection=1, AngularDeflection=0.1, Relative=False)
-Mesh_sideq3.Label = "Mesh_sideq3"
-# 3mf
-export_list = []
-export_list.append(Mesh_sideq3)
-Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/sideq3.3mf")
-
-
-
-
-
-'''
 # 4. side with hinge --> identical to short side, plus two hinge parts
-side_hinge_main  = makebox('side_hinge_main' , side_length  , common_width     , common_height)
-side_hinge_left  = makebox('side_hinge_left' , insert_length, insert_width_side, common_height - 4)
-side_hinge_right = makebox('side_hinge_right', insert_length, insert_width_side, common_height - 4)
+side_hinge_main  = makebox('side_hinge_main' , side_length  , common_width, common_height)
+side_hinge_left  = makebox('side_hinge_left' , insert_length, insert_width, cross_height )
+side_hinge_right = makebox('side_hinge_right', insert_length, insert_width, cross_height )
 side_hinge_ridg1 = makebox('side_hinge_ridg1', side_length/2 - hinge_length/2 -1 , ridge_width      , ridge_height) ## gap in ridge to open glass!
 side_hinge_ridg2 = makebox('side_hinge_ridg2', side_length/2 - hinge_length/2 -1 , ridge_width      , ridge_height)
-side_hinge_left.Placement  = FreeCAD.Placement(Vector(-insert_length, (common_width - insert_width_side)/2, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
-side_hinge_right.Placement = FreeCAD.Placement(Vector(side_length   , (common_width - insert_width_side)/2, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
-side_hinge_ridg1.Placement = FreeCAD.Placement(Vector(0             , (common_width - ridge_width)/2      , common_height), FreeCAD.Rotation(Vector(1,0,0), 0))
+side_hinge_left.Placement  = FreeCAD.Placement(Vector(-insert_length, (common_width - insert_width)/2, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
+side_hinge_right.Placement = FreeCAD.Placement(Vector(side_length   , (common_width - insert_width)/2, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
+side_hinge_ridg1.Placement = FreeCAD.Placement(Vector(0             , (common_width - ridge_width)/2 , common_height), FreeCAD.Rotation(Vector(1,0,0), 0))
 side_hinge_ridg2.Placement = FreeCAD.Placement(Vector(side_length/2 + hinge_length/2 +1 , (common_width - ridge_width)/2      , common_height), FreeCAD.Rotation(Vector(1,0,0), 0))
 side_hinge_ridg1.ViewObject.hide()
 side_hinge_ridg2.ViewObject.hide()
@@ -345,7 +240,103 @@ leaf_compound        = doc.addObject("Part::Compound","leaf_compound")
 leaf_compound.Links  = [cuthole2, hinge_middle,]
 leaf_compound.ViewObject.hide()
 
-'''
+
+# 6. side --> normal side with half-extension for quartershelve
+sideq_main  = makebox('sideq_main' , side_length  , common_width, common_height)
+sideq_left  = makebox('sideq_left' , insert_length, insert_width, insert_height)
+sideq_right = makebox('sideq_right', insert_length, insert_width, insert_height)
+sideq_ridge = makebox('sideq_ridge', side_length  , ridge_width , ridge_height )
+sideq_left.Placement  = FreeCAD.Placement(Vector(-insert_length, insert_Y, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
+sideq_right.Placement = FreeCAD.Placement(Vector(side_length   , insert_Y, 2            ), FreeCAD.Rotation(Vector(1,0,0), 0))
+sideq_ridge.Placement = FreeCAD.Placement(Vector(0             , ridge_Y , common_height), FreeCAD.Rotation(Vector(1,0,0), 0))
+# holders for shelve on the side, midway
+# Pythagoras helps a bit, 0.866 = cos30
+hypo   = common_width / cos30
+# main for the solid part
+holder1_main = makebox('holder1_main', common_width  , holder_length/2, common_height)
+holder2_main = makebox('holder2_main', common_width  , holder_length/2, common_height)
+holder1_main.Placement = FreeCAD.Placement(Vector(side_length/2 - hypo/2, common_width/2, 0),App.Rotation(App.Vector(0,0,1),30))
+holder2_main.Placement = FreeCAD.Placement(Vector(side_length/2 + hypo/2, common_width/2, 0),App.Rotation(App.Vector(0,0,1),210))
+# extr for the extrusion on which the shelve rests
+holder1_extr = makebox('holder1_extr', common_width/2, holder_length/2, common_height)
+holder2_extr = makebox('holder2_extr', common_width/2, holder_length/2, common_height)
+X1 = (side_length / 2) - (hypo / 2) - (insert_length * sin30)
+X2 = (side_length / 2) + (hypo / 2) + (insert_length * sin30) - ((common_width / 2) * cos30)
+Y1 = (common_width / 2) + (insert_length * cos30)
+Y2 = (common_width / 2) - (insert_length * cos30) - ((common_width / 2) * sin30)
+holder1_extr.Placement = FreeCAD.Placement(Vector(X1, Y1, 0),App.Rotation(App.Vector(0,0,1),30))
+holder2_extr.Placement = FreeCAD.Placement(Vector(X2, Y2, 0),App.Rotation(App.Vector(0,0,1),210))
+# edge for the back to push the shelve against
+holder1_edge = makebox('holder1_edge', common_width/2, holder_length/2, cross_cut)
+holder2_edge = makebox('holder2_edge', common_width/2, holder_length/2, cross_cut )
+X3 = (side_length / 2) - (hypo / 2) - (insert_length * sin30) + ((common_width / 2) * cos30)
+X4 = (side_length / 2) + (hypo / 2) + (insert_length * sin30)
+Y3 = (common_width / 2) + (insert_length * cos30) + ((common_width / 2) * sin30)
+Y4 = (common_width / 2) - (insert_length * cos30)   
+holder1_edge.Placement = FreeCAD.Placement(Vector(X3, Y3, 0),App.Rotation(App.Vector(0,0,1),30))
+holder2_edge.Placement = FreeCAD.Placement(Vector(X4, Y4, 0),App.Rotation(App.Vector(0,0,1),210))
+# both sides shelves
+sideq_compound        = doc.addObject("Part::Compound","sideq_compound")
+sideq_compound.Links  = [sideq_main, sideq_left, sideq_right,sideq_ridge, holder1_main, holder1_extr, holder1_edge, holder2_main, holder2_extr, holder2_edge]
+sideq_compound.ViewObject.hide()
+# refine
+Refine_sideq = doc.addObject('Part::Refine','Refine_sideq')
+Refine_sideq.Source = sideq_compound
+Refine_sideq.Label = 'Refine_sideq'
+Refine_sideq.ViewObject.hide()
+doc.recompute()
+# mesh
+Mesh_sideq = doc.addObject("Mesh::Feature","Mesh_sideq")
+Shape = Part.getShape(Refine_sideq,"")
+Mesh_sideq.Mesh = MeshPart.meshFromShape(Shape=Shape, LinearDeflection=1, AngularDeflection=0.1, Relative=False)
+Mesh_sideq.Label = "Mesh_sideq"
+Mesh_sideq.ViewObject.hide()
+# 3mf
+export_list = []
+export_list.append(Mesh_sideq)
+Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/sideq.3mf")
+
+# one side shelve
+sideq2_compound        = doc.addObject("Part::Compound","sideq2_compound")
+sideq2_compound.Links  = [sideq_main, sideq_left, sideq_right,sideq_ridge, holder1_main, holder1_extr, holder1_edge]
+sideq2_compound.ViewObject.hide()
+# refine
+Refine_sideq2 = doc.addObject('Part::Refine','Refine_sideq2')
+Refine_sideq2.Source = sideq2_compound
+Refine_sideq2.Label = 'Refine_sideq2'
+Refine_sideq2.ViewObject.hide()
+doc.recompute()
+# mesh
+Mesh_sideq2 = doc.addObject("Mesh::Feature","Mesh_sideq2")
+Shape = Part.getShape(Refine_sideq2,"")
+Mesh_sideq2.Mesh = MeshPart.meshFromShape(Shape=Shape, LinearDeflection=1, AngularDeflection=0.1, Relative=False)
+Mesh_sideq2.Label = "Mesh_sideq2"
+Mesh_sideq2.ViewObject.hide()
+# 3mf
+export_list = []
+export_list.append(Mesh_sideq2)
+Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/sideq2.3mf")
+
+# other side shelve
+sideq3_compound        = doc.addObject("Part::Compound","sideq3_compound")
+sideq3_compound.Links  = [sideq_main, sideq_left, sideq_right,sideq_ridge, holder2_main, holder2_extr, holder2_edge]
+sideq3_compound.ViewObject.hide()
+# refine
+Refine_sideq3 = doc.addObject('Part::Refine','Refine_sideq3')
+Refine_sideq3.Source = sideq3_compound
+Refine_sideq3.Label = 'Refine_sideq3'
+Refine_sideq3.ViewObject.hide()
+doc.recompute()
+# mesh
+Mesh_sideq3 = doc.addObject("Mesh::Feature","Mesh_sideq3")
+Shape = Part.getShape(Refine_sideq3,"")
+Mesh_sideq3.Mesh = MeshPart.meshFromShape(Shape=Shape, LinearDeflection=1, AngularDeflection=0.1, Relative=False)
+Mesh_sideq3.Label = "Mesh_sideq3"
+Mesh_sideq3.ViewObject.hide()
+# 3mf
+export_list = []
+export_list.append(Mesh_sideq3)
+Mesh.export(export_list, u"/home/paul/FreeCAD models/smurf/sideq3.3mf")
 
 doc.recompute()
 FreeCADGui.ActiveDocument.ActiveView.fitAll()
